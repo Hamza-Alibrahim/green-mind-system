@@ -1,0 +1,218 @@
+/* All text uses Cairo font */
+.app {
+  display: flex;
+  min-height: 100vh;
+  font-family: 'Cairo', sans-serif;
+}
+
+/* Update these classes with Cairo weights */
+.sidebar-logo h2 {
+  font-size: 20px;
+  font-weight: 700;
+  /* Bold */
+  color: var(--md-sys-color-primary);
+  margin-bottom: 5px;
+}
+
+.page-header h1 {
+  font-size: 28px;
+  font-weight: 800;
+  /* ExtraBold for headings */
+  color: var(--md-sys-color-primary);
+  margin-bottom: 5px;
+}
+
+.nav-item {
+  font-weight: 500;
+  /* Medium for navigation */
+}
+
+.btn {
+  font-weight: 600;
+  /* SemiBold for buttons */
+}
+
+/* Sidebar */
+.sidebar {
+  width: 250px;
+  background: var(--md-sys-color-surface-container-high);
+  color: var(--md-sys-color-on-surface);
+  padding: 20px 0;
+  display: flex;
+  flex-direction: column;
+  position: fixed;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  z-index: 100;
+  border-left: 1px solid var(--md-sys-color-outline-variant);
+}
+
+.sidebar-logo {
+  padding: 0 20px 20px;
+  border-bottom: 1px solid var(--md-sys-color-outline-variant);
+  text-align: center;
+}
+
+.sidebar-logo h2 {
+  font-size: 20px;
+  color: var(--md-sys-color-primary);
+  margin-bottom: 5px;
+}
+
+.sidebar-logo p {
+  font-size: 12px;
+  opacity: 0.7;
+}
+
+.sidebar-nav {
+  flex: 1;
+  padding: 10px;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 15px;
+  color: var(--md-sys-color-on-surface-variant);
+  cursor: pointer;
+  border-radius: 12px;
+  margin-bottom: 5px;
+  transition: all 0.2s;
+  border: none;
+  background: none;
+  width: 100%;
+  font-size: 14px;
+  text-decoration: none;
+}
+
+.nav-item:hover {
+  background: var(--md-sys-color-surface-variant);
+}
+
+.nav-item.active {
+  background: var(--md-sys-color-primary-container);
+  color: var(--md-sys-color-on-primary-container);
+  font-weight: bold;
+}
+
+.nav-item svg {
+  font-size: 20px;
+}
+
+/* Main Content */
+.main-content {
+  flex: 1;
+  margin-right: 250px;
+  padding: 30px;
+  min-height: 100vh;
+  background: var(--md-sys-color-background);
+}
+
+/* Page Header */
+.page-header {
+  margin-bottom: 30px;
+}
+
+.page-header h1 {
+  font-size: 28px;
+  color: var(--md-sys-color-primary);
+  margin-bottom: 5px;
+}
+
+.page-header p {
+  color: var(--md-sys-color-on-surface-variant);
+  font-size: 14px;
+}
+
+/* Cards */
+.card {
+  background: var(--md-sys-color-surface);
+  border-radius: 16px;
+  padding: 24px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  border: 1px solid var(--md-sys-color-outline-variant);
+}
+
+/* Buttons */
+.btn {
+  padding: 10px 24px;
+  border-radius: 20px;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.2s;
+}
+
+.btn-primary {
+  background: var(--md-sys-color-primary);
+  color: var(--md-sys-color-on-primary);
+}
+
+.btn-primary:hover {
+  background: var(--md-sys-color-on-primary-container);
+  color: var(--md-sys-color-primary-container);
+}
+
+.btn-danger {
+  background: var(--md-sys-color-error);
+  color: white;
+}
+
+.btn-outline {
+  background: transparent;
+  border: 2px solid var(--md-sys-color-outline);
+  color: var(--md-sys-color-primary);
+}
+
+.btn-outline:hover {
+  background: var(--md-sys-color-primary-container);
+}
+
+/* Theme toggle button */
+.theme-toggle {
+  position: fixed;
+  top: 20px;
+  left: 20px;
+  z-index: 1000;
+  background: var(--md-sys-color-surface-container-high);
+  border: 1px solid var(--md-sys-color-outline-variant);
+  color: var(--md-sys-color-on-surface);
+  padding: 10px;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  transition: all 0.2s;
+}
+
+.theme-toggle:hover {
+  background: var(--md-sys-color-surface-variant);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .sidebar {
+    width: 100%;
+    position: relative;
+    height: auto;
+  }
+
+  .main-content {
+    margin-right: 0;
+  }
+
+  .app {
+    flex-direction: column;
+  }
+}
