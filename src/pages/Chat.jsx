@@ -43,10 +43,20 @@ function Chat() {
         }
     }, [location.state])
 
-    // Auto scroll to bottom
+    // Auto scroll to bottom only when new messages are added
+    const shouldAutoScroll = useRef(true)
+
     useEffect(() => {
-        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+        if (shouldAutoScroll.current && messages.length > 0) {
+            messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+        }
     }, [messages])
+
+    // Don't auto-scroll if user manually scrolled up
+    const handleScroll = (e) => {
+        const { scrollTop, scrollHeight, clientHeight } = e.target
+        shouldAutoScroll.current = scrollHeight - scrollTop - clientHeight < 100
+    }
 
     const handleBotResponse = async (userMessage) => {
         setIsLoading(true)
@@ -141,8 +151,7 @@ function Chat() {
             </motion.div>
 
             {/* Chat Container */}
-            <div className="card" style={{ padding: '0', overflow: 'hidden', display: 'flex', flexDirection: 'column', height: 'calc(100vh - 300px)' }}>
-                {/* Chat Header */}
+            <div className="chat-container card" style={{ padding: '0', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>                {/* Chat Header */}
                 <div style={{
                     padding: '16px 20px',
                     background: 'var(--md-sys-color-primary-container)',

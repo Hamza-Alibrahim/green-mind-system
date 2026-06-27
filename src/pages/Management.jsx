@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import toast from 'react-hot-toast'
 import {
@@ -15,7 +15,14 @@ import {
 import Select from '../components/common/Select'
 
 function Management() {
-    // Mock data - replace with API later
+    const [isMobile, setIsMobile] = useState(window.innerWidth <= 768)
+
+    useEffect(() => {
+        const handleResize = () => setIsMobile(window.innerWidth <= 768)
+        window.addEventListener('resize', handleResize)
+        return () => window.removeEventListener('resize', handleResize)
+    }, [])
+
     const [plants, setPlants] = useState([
         {
             id: 1,
@@ -63,14 +70,12 @@ function Management() {
     const cropTypes = ['طماطم', 'بطاطا', 'تفاح']
     const healthStatuses = ['سليم', 'مصاب', 'تحت المراقبة']
 
-    // Filter plants by search
     const filteredPlants = plants.filter(plant =>
         plant.name.includes(searchTerm) ||
         plant.type.includes(searchTerm) ||
         plant.health_status.includes(searchTerm)
     )
 
-    // Open form for adding
     const handleAdd = () => {
         setEditingPlant(null)
         setFormData({
@@ -85,7 +90,6 @@ function Management() {
         setShowForm(true)
     }
 
-    // Open form for editing
     const handleEdit = (plant) => {
         setEditingPlant(plant)
         setFormData({
@@ -100,18 +104,10 @@ function Management() {
         setShowForm(true)
     }
 
-    // Validate form
     const validateForm = () => {
         const newErrors = {}
-
-        if (!formData.name.trim()) {
-            newErrors.name = 'اسم الدفعة مطلوب'
-        }
-
-        if (!formData.type) {
-            newErrors.type = 'نوع المحصول مطلوب'
-        }
-
+        if (!formData.name.trim()) newErrors.name = 'اسم الدفعة مطلوب'
+        if (!formData.type) newErrors.type = 'نوع المحصول مطلوب'
         if (!formData.planting_date) {
             newErrors.planting_date = 'تاريخ الزراعة مطلوب'
         } else {
@@ -122,23 +118,17 @@ function Management() {
                 newErrors.planting_date = 'لا يمكن تحديد تاريخ في المستقبل'
             }
         }
-
         if (!formData.quantity || parseInt(formData.quantity) < 1) {
             newErrors.quantity = 'الكمية يجب أن تكون أكبر من صفر'
         }
-
         setErrors(newErrors)
         return Object.keys(newErrors).length === 0
     }
 
-    // Handle form submit
     const handleSubmit = (e) => {
         e.preventDefault()
-
         if (!validateForm()) return
-
         if (editingPlant) {
-            // Update existing plant
             setPlants(prev => prev.map(plant =>
                 plant.id === editingPlant.id
                     ? { ...plant, ...formData, quantity: parseInt(formData.quantity) }
@@ -146,7 +136,6 @@ function Management() {
             ))
             toast.success('تم تحديث الدفعة بنجاح')
         } else {
-            // Add new plant
             const newPlant = {
                 id: Date.now(),
                 ...formData,
@@ -155,45 +144,26 @@ function Management() {
             setPlants(prev => [...prev, newPlant])
             toast.success('تم إضافة الدفعة بنجاح')
         }
-
         setShowForm(false)
         setEditingPlant(null)
     }
 
-    // Handle delete
     const handleDelete = (plant) => {
         setPlants(prev => prev.filter(p => p.id !== plant.id))
         setDeleteConfirm(null)
         toast.success('تم حذف الدفعة بنجاح')
     }
 
-    // Get health status style
     const getHealthStyle = (status) => {
         switch (status) {
             case 'سليم':
-                return {
-                    bg: 'var(--md-sys-color-primary-container)',
-                    color: 'var(--md-sys-color-on-primary-container)',
-                    icon: <MdCheckCircle size={14} />
-                }
+                return { bg: 'var(--md-sys-color-primary-container)', color: 'var(--md-sys-color-on-primary-container)', icon: <MdCheckCircle size={14} /> }
             case 'مصاب':
-                return {
-                    bg: 'var(--md-sys-color-error-container)',
-                    color: 'var(--md-sys-color-on-error-container)',
-                    icon: <MdError size={14} />
-                }
+                return { bg: 'var(--md-sys-color-error-container)', color: 'var(--md-sys-color-on-error-container)', icon: <MdError size={14} /> }
             case 'تحت المراقبة':
-                return {
-                    bg: '#FFF3E0',
-                    color: '#ED6C02',
-                    icon: <MdWarning size={14} />
-                }
+                return { bg: '#FFF3E0', color: '#ED6C02', icon: <MdWarning size={14} /> }
             default:
-                return {
-                    bg: 'var(--md-sys-color-surface-variant)',
-                    color: 'var(--md-sys-color-on-surface-variant)',
-                    icon: <MdCheckCircle size={14} />
-                }
+                return { bg: 'var(--md-sys-color-surface-variant)', color: 'var(--md-sys-color-on-surface-variant)', icon: <MdCheckCircle size={14} /> }
         }
     }
 
@@ -213,23 +183,23 @@ function Management() {
                     justifyContent: 'space-between',
                     alignItems: 'center',
                     marginBottom: '20px',
-                    gap: '16px',
+                    gap: '12px',
                     flexWrap: 'wrap'
                 }}
             >
-                {/* Search */}
                 <div style={{
                     display: 'flex',
                     alignItems: 'center',
                     gap: '8px',
                     flex: 1,
-                    maxWidth: '400px',
+                    minWidth: isMobile ? '100%' : '200px',
+                    maxWidth: isMobile ? '100%' : '400px',
                     padding: '10px 16px',
                     borderRadius: '12px',
                     background: 'var(--md-sys-color-surface)',
                     border: '1px solid var(--md-sys-color-outline-variant)'
                 }}>
-                    <MdSearch style={{ color: 'var(--md-sys-color-outline)', fontSize: '20px' }} />
+                    <MdSearch style={{ color: 'var(--md-sys-color-outline)', fontSize: '20px', flexShrink: 0 }} />
                     <input
                         type="text"
                         placeholder="بحث عن دفعة..."
@@ -242,212 +212,107 @@ function Management() {
                             flex: 1,
                             fontSize: '14px',
                             fontFamily: 'Cairo, sans-serif',
-                            color: 'var(--md-sys-color-on-surface)'
+                            color: 'var(--md-sys-color-on-surface)',
+                            minWidth: '100px'
                         }}
                     />
                     {searchTerm && (
                         <MdClose
                             onClick={() => setSearchTerm('')}
-                            style={{ cursor: 'pointer', color: 'var(--md-sys-color-outline)' }}
+                            style={{ cursor: 'pointer', color: 'var(--md-sys-color-outline)', flexShrink: 0 }}
                         />
                     )}
                 </div>
 
-                {/* Add Button */}
                 <motion.button
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                     onClick={handleAdd}
                     className="btn btn-primary"
-                    style={{ padding: '10px 24px' }}
+                    style={{ padding: '10px 20px', whiteSpace: 'nowrap' }}
                 >
                     <MdAdd /> إضافة دفعة جديدة
                 </motion.button>
             </motion.div>
 
-            {/* Plants Table */}
-            <div className="card" style={{ padding: '0', overflow: 'hidden' }}>
-                <div style={{ overflowX: 'auto' }}>
-                    <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                        <thead>
-                            <tr style={{
-                                background: 'var(--md-sys-color-primary-container)',
-                                color: 'var(--md-sys-color-on-primary-container)'
-                            }}>
-                                <th style={thStyle}>اسم الدفعة</th>
-                                <th style={thStyle}>نوع المحصول</th>
-                                <th style={thStyle}>تاريخ الزراعة</th>
-                                <th style={thStyle}>الكمية</th>
-                                <th style={thStyle}>الحالة الصحية</th>
-                                <th style={thStyle}>ملاحظات</th>
-                                <th style={thStyle}>إجراءات</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <AnimatePresence>
-                                {filteredPlants.length === 0 ? (
-                                    <tr>
-                                        <td colSpan={7} style={{ padding: '60px', textAlign: 'center' }}>
-                                            <motion.div
-                                                initial={{ opacity: 0 }}
-                                                animate={{ opacity: 1 }}
-                                            >
-                                                <MdAgriculture style={{ fontSize: '48px', color: 'var(--md-sys-color-outline)', marginBottom: '12px' }} />
-                                                <p style={{ color: 'var(--md-sys-color-on-surface-variant)', fontSize: '16px', fontWeight: 500 }}>
-                                                    {searchTerm ? 'لا توجد نتائج مطابقة للبحث' : 'لا توجد دفعات مسجلة'}
-                                                </p>
-                                                <p style={{ color: 'var(--md-sys-color-outline)', fontSize: '14px', marginTop: '4px' }}>
-                                                    {searchTerm ? 'جرب كلمة بحث مختلفة' : 'قم بإضافة دفعة جديدة للبدء'}
-                                                </p>
-                                            </motion.div>
-                                        </td>
-                                    </tr>
-                                ) : (
-                                    filteredPlants.map((plant, index) => (
-                                        <motion.tr
-                                            key={plant.id}
-                                            initial={{ opacity: 0, x: -20 }}
-                                            animate={{ opacity: 1, x: 0 }}
-                                            exit={{ opacity: 0, x: 20 }}
-                                            transition={{ delay: index * 0.05 }}
-                                            style={{
-                                                borderBottom: '1px solid var(--md-sys-color-outline-variant)',
-                                                background: index % 2 === 0 ? 'transparent' : 'var(--md-sys-color-surface-container-low)'
-                                            }}
-                                            whileHover={{
-                                                background: 'var(--md-sys-color-surface-variant)'
-                                            }}
-                                        >
-                                            <td style={tdStyle}>
-                                                <span style={{ fontWeight: 600 }}>{plant.name}</span>
+            {/* Desktop Table */}
+            {!isMobile && (
+                <div className="card" style={{ padding: '0', overflow: 'hidden' }}>
+                    <div style={{ overflowX: 'auto' }}>
+                        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                            <thead>
+                                <tr style={{ background: 'var(--md-sys-color-primary-container)', color: 'var(--md-sys-color-on-primary-container)' }}>
+                                    <th style={thStyle}>اسم الدفعة</th>
+                                    <th style={thStyle}>نوع المحصول</th>
+                                    <th style={thStyle}>تاريخ الزراعة</th>
+                                    <th style={thStyle}>الكمية</th>
+                                    <th style={thStyle}>الحالة الصحية</th>
+                                    <th style={thStyle}>ملاحظات</th>
+                                    <th style={thStyle}>إجراءات</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <AnimatePresence>
+                                    {filteredPlants.length === 0 ? (
+                                        <tr>
+                                            <td colSpan={7} style={{ padding: '60px', textAlign: 'center' }}>
+                                                <EmptyState searchTerm={searchTerm} />
                                             </td>
-                                            <td style={tdStyle}>{plant.type}</td>
-                                            <td style={tdStyle}>{plant.planting_date}</td>
-                                            <td style={tdStyle}>
-                                                <span style={{ fontWeight: 600 }}>
-                                                    {plant.quantity.toLocaleString()}
-                                                </span>
-                                            </td>
-                                            <td style={tdStyle}>
-                                                <span style={{
-                                                    display: 'inline-flex',
-                                                    alignItems: 'center',
-                                                    gap: '6px',
-                                                    padding: '4px 12px',
-                                                    borderRadius: '20px',
-                                                    fontSize: '13px',
-                                                    fontWeight: 500,
-                                                    background: getHealthStyle(plant.health_status).bg,
-                                                    color: getHealthStyle(plant.health_status).color
-                                                }}>
-                                                    {getHealthStyle(plant.health_status).icon}
-                                                    {plant.health_status}
-                                                </span>
-                                            </td>
-                                            <td style={{
-                                                ...tdStyle,
-                                                maxWidth: '200px',
-                                                overflow: 'hidden',
-                                                textOverflow: 'ellipsis',
-                                                whiteSpace: 'nowrap'
-                                            }}>
-                                                {plant.notes || '-'}
-                                            </td>
-                                            <td style={tdStyle}>
-                                                <div style={{ display: 'flex', gap: '8px' }}>
-                                                    <motion.button
-                                                        whileHover={{ scale: 1.1 }}
-                                                        whileTap={{ scale: 0.9 }}
-                                                        onClick={() => handleEdit(plant)}
-                                                        style={{
-                                                            width: '36px',
-                                                            height: '36px',
-                                                            borderRadius: '8px',
-                                                            border: 'none',
-                                                            cursor: 'pointer',
-                                                            background: 'var(--md-sys-color-secondary-container)',
-                                                            color: 'var(--md-sys-color-on-secondary-container)',
-                                                            display: 'flex',
-                                                            alignItems: 'center',
-                                                            justifyContent: 'center',
-                                                            fontSize: '16px'
-                                                        }}
-                                                        title="تعديل"
-                                                    >
-                                                        <MdEdit />
-                                                    </motion.button>
-
-                                                    <motion.button
-                                                        whileHover={{ scale: 1.1 }}
-                                                        whileTap={{ scale: 0.9 }}
-                                                        onClick={() => setDeleteConfirm(plant)}
-                                                        style={{
-                                                            width: '36px',
-                                                            height: '36px',
-                                                            borderRadius: '8px',
-                                                            border: 'none',
-                                                            cursor: 'pointer',
-                                                            background: 'var(--md-sys-color-error-container)',
-                                                            color: 'var(--md-sys-color-on-error-container)',
-                                                            display: 'flex',
-                                                            alignItems: 'center',
-                                                            justifyContent: 'center',
-                                                            fontSize: '16px'
-                                                        }}
-                                                        title="حذف"
-                                                    >
-                                                        <MdDelete />
-                                                    </motion.button>
-                                                </div>
-                                            </td>
-                                        </motion.tr>
-                                    ))
-                                )}
-                            </AnimatePresence>
-                        </tbody>
-                    </table>
+                                        </tr>
+                                    ) : (
+                                        filteredPlants.map((plant, index) => (
+                                            <TableRow
+                                                key={plant.id}
+                                                plant={plant}
+                                                index={index}
+                                                onEdit={handleEdit}
+                                                onDelete={setDeleteConfirm}
+                                                getHealthStyle={getHealthStyle}
+                                            />
+                                        ))
+                                    )}
+                                </AnimatePresence>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
-            </div>
+            )}
+
+            {/* Mobile Cards */}
+            {isMobile && (
+                <div>
+                    <AnimatePresence>
+                        {filteredPlants.length === 0 ? (
+                            <div className="card" style={{ textAlign: 'center', padding: '40px' }}>
+                                <EmptyState searchTerm={searchTerm} />
+                            </div>
+                        ) : (
+                            filteredPlants.map((plant, index) => (
+                                <MobileCard
+                                    key={plant.id}
+                                    plant={plant}
+                                    index={index}
+                                    onEdit={handleEdit}
+                                    onDelete={setDeleteConfirm}
+                                    getHealthStyle={getHealthStyle}
+                                />
+                            ))
+                        )}
+                    </AnimatePresence>
+                </div>
+            )}
 
             {/* Stats */}
             <div style={{
                 display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-                gap: '16px',
+                gridTemplateColumns: `repeat(auto-fit, minmax(${isMobile ? '140px' : '200px'}, 1fr))`,
+                gap: '12px',
                 marginTop: '20px'
             }}>
-                <div className="card" style={{ textAlign: 'center' }}>
-                    <p style={{ color: 'var(--md-sys-color-on-surface-variant)', fontSize: '14px', marginBottom: '8px' }}>
-                        إجمالي الدفعات
-                    </p>
-                    <h3 style={{ color: 'var(--md-sys-color-primary)', fontSize: '28px' }}>
-                        {plants.length}
-                    </h3>
-                </div>
-                <div className="card" style={{ textAlign: 'center' }}>
-                    <p style={{ color: 'var(--md-sys-color-on-surface-variant)', fontSize: '14px', marginBottom: '8px' }}>
-                        نباتات سليمة
-                    </p>
-                    <h3 style={{ color: 'var(--md-sys-color-primary)', fontSize: '28px' }}>
-                        {plants.filter(p => p.health_status === 'سليم').length}
-                    </h3>
-                </div>
-                <div className="card" style={{ textAlign: 'center' }}>
-                    <p style={{ color: 'var(--md-sys-color-on-surface-variant)', fontSize: '14px', marginBottom: '8px' }}>
-                        نباتات مصابة
-                    </p>
-                    <h3 style={{ color: 'var(--md-sys-color-error)', fontSize: '28px' }}>
-                        {plants.filter(p => p.health_status === 'مصاب').length}
-                    </h3>
-                </div>
-                <div className="card" style={{ textAlign: 'center' }}>
-                    <p style={{ color: 'var(--md-sys-color-on-surface-variant)', fontSize: '14px', marginBottom: '8px' }}>
-                        إجمالي النباتات
-                    </p>
-                    <h3 style={{ color: 'var(--md-sys-color-primary)', fontSize: '28px' }}>
-                        {plants.reduce((sum, p) => sum + p.quantity, 0).toLocaleString()}
-                    </h3>
-                </div>
+                <StatCard label="إجمالي الدفعات" value={plants.length} color="var(--md-sys-color-primary)" />
+                <StatCard label="نباتات سليمة" value={plants.filter(p => p.health_status === 'سليم').length} color="var(--md-sys-color-primary)" />
+                <StatCard label="نباتات مصابة" value={plants.filter(p => p.health_status === 'مصاب').length} color="var(--md-sys-color-error)" />
+                <StatCard label="إجمالي النباتات" value={plants.reduce((sum, p) => sum + p.quantity, 0).toLocaleString()} color="var(--md-sys-color-primary)" />
             </div>
 
             {/* Add/Edit Form Modal */}
@@ -469,7 +334,7 @@ function Management() {
                             alignItems: 'center',
                             justifyContent: 'center',
                             zIndex: 1000,
-                            padding: '20px'
+                            padding: isMobile ? '10px' : '20px'
                         }}
                     >
                         <motion.div
@@ -482,7 +347,7 @@ function Management() {
                                 borderRadius: '16px',
                                 maxWidth: '500px',
                                 width: '100%',
-                                maxHeight: '80vh',
+                                maxHeight: isMobile ? '90vh' : '80vh',
                                 display: 'flex',
                                 flexDirection: 'column',
                                 overflow: 'hidden',
@@ -492,7 +357,7 @@ function Management() {
                         >
                             {/* Fixed Header */}
                             <div style={{
-                                padding: '20px 24px',
+                                padding: '16px 20px',
                                 borderBottom: '1px solid var(--md-sys-color-outline-variant)',
                                 display: 'flex',
                                 justifyContent: 'space-between',
@@ -500,167 +365,79 @@ function Management() {
                                 flexShrink: 0,
                                 background: 'var(--md-sys-color-surface)'
                             }}>
-                                <h3 style={{ fontWeight: 700, margin: 0 }}>
+                                <h3 style={{ fontWeight: 700, margin: 0, fontSize: isMobile ? '16px' : '18px' }}>
                                     {editingPlant ? 'تعديل بيانات الدفعة' : 'إضافة دفعة جديدة'}
                                 </h3>
                                 <motion.button
                                     whileHover={{ scale: 1.1 }}
                                     whileTap={{ scale: 0.9 }}
                                     onClick={() => setShowForm(false)}
-                                    style={{
-                                        background: 'transparent',
-                                        border: 'none',
-                                        cursor: 'pointer',
-                                        fontSize: '24px',
-                                        color: 'var(--md-sys-color-on-surface-variant)',
-                                        width: '36px',
-                                        height: '36px',
-                                        borderRadius: '50%',
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        justifyContent: 'center'
-                                    }}
+                                    style={closeBtnStyle}
                                 >
                                     <MdClose />
                                 </motion.button>
                             </div>
 
-                            {/* Scrollable Form Fields */}
-                            <div style={{
-                                padding: '24px',
-                                overflowY: 'auto',
-                                flex: 1
-                            }}>
-                                <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                                    {/* Name */}
-                                    <div>
-                                        <label style={labelStyle}>اسم الدفعة *</label>
-                                        <input
-                                            type="text"
-                                            value={formData.name}
-                                            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                                            style={{
-                                                ...inputStyle,
-                                                borderColor: errors.name ? 'var(--md-sys-color-error)' : 'var(--md-sys-color-outline-variant)'
-                                            }}
-                                            placeholder="مثال: حقل طماطم 1"
-                                        />
-                                        {errors.name && <span style={errorStyle}>{errors.name}</span>}
-                                    </div>
+                            {/* Scrollable Form */}
+                            <div style={{ padding: isMobile ? '16px' : '24px', overflowY: 'auto', flex: 1 }}>
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+                                    <FormField label="اسم الدفعة *" error={errors.name}>
+                                        <input type="text" value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                                            style={{ ...inputStyle, borderColor: errors.name ? 'var(--md-sys-color-error)' : 'var(--md-sys-color-outline-variant)' }}
+                                            placeholder="مثال: حقل طماطم 1" />
+                                    </FormField>
 
-                                    {/* Type */}
-                                    <div>
-                                        <Select
-                                            label="نوع المحصول *"
-                                            value={formData.type}
-                                            onChange={(value) => setFormData({ ...formData, type: value })}
+                                    <FormField label="نوع المحصول *" error={errors.type}>
+                                        <Select value={formData.type} onChange={(value) => setFormData({ ...formData, type: value })}
                                             options={cropTypes.map(type => ({ value: type, label: type }))}
-                                            placeholder="اختر نوع المحصول"
-                                            error={!!errors.type}
-                                        />
-                                        {errors.type && <span style={errorStyle}>{errors.type}</span>}
-                                    </div>
+                                            placeholder="اختر نوع المحصول" error={!!errors.type} />
+                                    </FormField>
 
-                                    {/* Planting Date */}
-                                    <div>
-                                        <label style={labelStyle}>تاريخ الزراعة *</label>
-                                        <input
-                                            type="date"
-                                            value={formData.planting_date}
+                                    <FormField label="تاريخ الزراعة *" error={errors.planting_date}>
+                                        <input type="date" value={formData.planting_date}
                                             onChange={(e) => setFormData({ ...formData, planting_date: e.target.value })}
                                             max={new Date().toISOString().split('T')[0]}
-                                            style={{
-                                                ...inputStyle,
-                                                borderColor: errors.planting_date ? 'var(--md-sys-color-error)' : 'var(--md-sys-color-outline-variant)'
-                                            }}
-                                        />
-                                        {errors.planting_date && <span style={errorStyle}>{errors.planting_date}</span>}
-                                    </div>
+                                            style={{ ...inputStyle, borderColor: errors.planting_date ? 'var(--md-sys-color-error)' : 'var(--md-sys-color-outline-variant)' }} />
+                                    </FormField>
 
-                                    {/* Quantity */}
-                                    <div>
-                                        <label style={labelStyle}>الكمية *</label>
-                                        <input
-                                            type="number"
-                                            value={formData.quantity}
+                                    <FormField label="الكمية *" error={errors.quantity}>
+                                        <input type="number" value={formData.quantity}
                                             onChange={(e) => setFormData({ ...formData, quantity: e.target.value })}
-                                            min="1"
-                                            style={{
-                                                ...inputStyle,
-                                                borderColor: errors.quantity ? 'var(--md-sys-color-error)' : 'var(--md-sys-color-outline-variant)'
-                                            }}
-                                            placeholder="عدد النباتات"
-                                        />
-                                        {errors.quantity && <span style={errorStyle}>{errors.quantity}</span>}
-                                    </div>
+                                            min="1" placeholder="عدد النباتات"
+                                            style={{ ...inputStyle, borderColor: errors.quantity ? 'var(--md-sys-color-error)' : 'var(--md-sys-color-outline-variant)' }} />
+                                    </FormField>
 
-                                    {/* Health Status */}
-                                    <div>
-                                        <Select
-                                            label="الحالة الصحية"
-                                            value={formData.health_status}
+                                    <FormField label="الحالة الصحية">
+                                        <Select value={formData.health_status}
                                             onChange={(value) => setFormData({ ...formData, health_status: value })}
-                                            options={healthStatuses.map(status => ({ value: status, label: status }))}
-                                        />
-                                    </div>
+                                            options={healthStatuses.map(status => ({ value: status, label: status }))} />
+                                    </FormField>
 
-                                    {/* Notes */}
-                                    <div>
-                                        <label style={labelStyle}>ملاحظات</label>
-                                        <textarea
-                                            value={formData.notes}
+                                    <FormField label="ملاحظات">
+                                        <textarea value={formData.notes}
                                             onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-                                            rows={3}
-                                            style={{ ...inputStyle, resize: 'vertical' }}
-                                            placeholder="أي ملاحظات إضافية..."
-                                        />
-                                    </div>
+                                            rows={3} style={{ ...inputStyle, resize: 'vertical' }}
+                                            placeholder="أي ملاحظات إضافية..." />
+                                    </FormField>
                                 </div>
                             </div>
 
-                            {/* Fixed Footer with Buttons */}
+                            {/* Fixed Footer */}
                             <div style={{
-                                padding: '16px 24px',
+                                padding: '12px 20px',
                                 borderTop: '1px solid var(--md-sys-color-outline-variant)',
                                 display: 'flex',
-                                gap: '12px',
+                                gap: '10px',
                                 flexShrink: 0,
                                 background: 'var(--md-sys-color-surface)'
                             }}>
-                                <motion.button
-                                    whileHover={{ scale: 1.02 }}
-                                    whileTap={{ scale: 0.98 }}
-                                    type="button"
-                                    onClick={() => setShowForm(false)}
-                                    style={{
-                                        flex: 1,
-                                        padding: '12px',
-                                        borderRadius: '12px',
-                                        border: '1px solid var(--md-sys-color-outline-variant)',
-                                        background: 'transparent',
-                                        color: 'var(--md-sys-color-on-surface)',
-                                        cursor: 'pointer',
-                                        fontSize: '14px',
-                                        fontWeight: 600,
-                                        fontFamily: 'Cairo, sans-serif'
-                                    }}
-                                >
-                                    إلغاء
-                                </motion.button>
-                                <motion.button
-                                    whileHover={{ scale: 1.02 }}
-                                    whileTap={{ scale: 0.98 }}
-                                    type="submit"
-                                    onClick={handleSubmit}
+                                <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}
+                                    type="button" onClick={() => setShowForm(false)}
+                                    style={cancelBtnStyle}>إلغاء</motion.button>
+                                <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}
+                                    type="submit" onClick={handleSubmit}
                                     className="btn btn-primary"
-                                    style={{
-                                        flex: 1,
-                                        padding: '12px',
-                                        justifyContent: 'center',
-                                        fontSize: '14px',
-                                        border: 'none'
-                                    }}
-                                >
+                                    style={{ flex: 1, padding: '12px', justifyContent: 'center', fontSize: '14px', border: 'none' }}>
                                     {editingPlant ? 'تحديث' : 'إضافة'}
                                 </motion.button>
                             </div>
@@ -669,93 +446,29 @@ function Management() {
                 )}
             </AnimatePresence>
 
-            {/* Delete Confirmation Modal */}
+            {/* Delete Confirmation */}
             <AnimatePresence>
                 {deleteConfirm && (
-                    <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
+                    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
                         onClick={() => setDeleteConfirm(null)}
-                        style={{
-                            position: 'fixed',
-                            top: 0,
-                            left: 0,
-                            right: 0,
-                            bottom: 0,
-                            background: 'rgba(0,0,0,0.5)',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            zIndex: 1000,
-                            padding: '20px'
-                        }}
-                    >
-                        <motion.div
-                            initial={{ scale: 0.9, opacity: 0 }}
-                            animate={{ scale: 1, opacity: 1 }}
-                            exit={{ scale: 0.9, opacity: 0 }}
+                        style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: '20px' }}>
+                        <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.9, opacity: 0 }}
                             onClick={(e) => e.stopPropagation()}
-                            className="card"
-                            style={{ maxWidth: '400px', width: '100%', textAlign: 'center' }}
-                        >
-                            <div style={{
-                                width: '64px',
-                                height: '64px',
-                                borderRadius: '50%',
-                                background: 'var(--md-sys-color-error-container)',
-                                color: 'var(--md-sys-color-on-error-container)',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                margin: '0 auto 16px',
-                                fontSize: '32px'
-                            }}>
+                            className="card" style={{ maxWidth: '400px', width: '100%', textAlign: 'center' }}>
+                            <div style={{ width: '56px', height: '56px', borderRadius: '50%', background: 'var(--md-sys-color-error-container)', color: 'var(--md-sys-color-on-error-container)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px', fontSize: '28px' }}>
                                 <MdDelete />
                             </div>
-
-                            <h3 style={{ marginBottom: '8px', fontWeight: 700 }}>تأكيد الحذف</h3>
-                            <p style={{ color: 'var(--md-sys-color-on-surface-variant)', fontSize: '14px', marginBottom: '24px' }}>
+                            <h3 style={{ marginBottom: '8px', fontWeight: 700, fontSize: '18px' }}>تأكيد الحذف</h3>
+                            <p style={{ color: 'var(--md-sys-color-on-surface-variant)', fontSize: '14px', marginBottom: '20px' }}>
                                 هل أنت متأكد من حذف دفعة "{deleteConfirm.name}"؟ لا يمكن التراجع عن هذا الإجراء.
                             </p>
-
-                            <div style={{ display: 'flex', gap: '12px' }}>
-                                <motion.button
-                                    whileHover={{ scale: 1.02 }}
-                                    whileTap={{ scale: 0.98 }}
+                            <div style={{ display: 'flex', gap: '10px' }}>
+                                <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}
                                     onClick={() => setDeleteConfirm(null)}
-                                    style={{
-                                        flex: 1,
-                                        padding: '12px',
-                                        borderRadius: '12px',
-                                        border: '1px solid var(--md-sys-color-outline-variant)',
-                                        background: 'transparent',
-                                        color: 'var(--md-sys-color-on-surface)',
-                                        cursor: 'pointer',
-                                        fontSize: '14px',
-                                        fontWeight: 600,
-                                        fontFamily: 'Cairo, sans-serif'
-                                    }}
-                                >
-                                    إلغاء
-                                </motion.button>
-                                <motion.button
-                                    whileHover={{ scale: 1.02 }}
-                                    whileTap={{ scale: 0.98 }}
+                                    style={cancelBtnStyle}>إلغاء</motion.button>
+                                <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}
                                     onClick={() => handleDelete(deleteConfirm)}
-                                    style={{
-                                        flex: 1,
-                                        padding: '12px',
-                                        borderRadius: '12px',
-                                        border: 'none',
-                                        background: 'var(--md-sys-color-error)',
-                                        color: 'white',
-                                        cursor: 'pointer',
-                                        fontSize: '14px',
-                                        fontWeight: 600,
-                                        fontFamily: 'Cairo, sans-serif'
-                                    }}
-                                >
+                                    style={{ flex: 1, padding: '12px', borderRadius: '12px', border: 'none', background: 'var(--md-sys-color-error)', color: 'white', cursor: 'pointer', fontSize: '14px', fontWeight: 600, fontFamily: 'Cairo, sans-serif' }}>
                                     تأكيد الحذف
                                 </motion.button>
                             </div>
@@ -767,47 +480,118 @@ function Management() {
     )
 }
 
+// Sub-components
+function EmptyState({ searchTerm }) {
+    return (
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+            <MdAgriculture style={{ fontSize: '48px', color: 'var(--md-sys-color-outline)', marginBottom: '12px' }} />
+            <p style={{ color: 'var(--md-sys-color-on-surface-variant)', fontSize: '16px', fontWeight: 500 }}>
+                {searchTerm ? 'لا توجد نتائج مطابقة للبحث' : 'لا توجد دفعات مسجلة'}
+            </p>
+            <p style={{ color: 'var(--md-sys-color-outline)', fontSize: '14px', marginTop: '4px' }}>
+                {searchTerm ? 'جرب كلمة بحث مختلفة' : 'قم بإضافة دفعة جديدة للبدء'}
+            </p>
+        </motion.div>
+    )
+}
+
+function TableRow({ plant, index, onEdit, onDelete, getHealthStyle }) {
+    const hs = getHealthStyle(plant.health_status)
+    return (
+        <motion.tr
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: 20 }}
+            transition={{ delay: index * 0.05 }}
+            style={{ borderBottom: '1px solid var(--md-sys-color-outline-variant)', background: index % 2 === 0 ? 'transparent' : 'var(--md-sys-color-surface-container-low)' }}
+            whileHover={{ background: 'var(--md-sys-color-surface-variant)' }}>
+            <td style={tdStyle}><span style={{ fontWeight: 600 }}>{plant.name}</span></td>
+            <td style={tdStyle}>{plant.type}</td>
+            <td style={tdStyle}>{plant.planting_date}</td>
+            <td style={tdStyle}><span style={{ fontWeight: 600 }}>{plant.quantity.toLocaleString()}</span></td>
+            <td style={tdStyle}>
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '4px 12px', borderRadius: '20px', fontSize: '13px', fontWeight: 500, background: hs.bg, color: hs.color }}>
+                    {hs.icon} {plant.health_status}
+                </span>
+            </td>
+            <td style={{ ...tdStyle, maxWidth: '200px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{plant.notes || '-'}</td>
+            <td style={tdStyle}>
+                <div style={{ display: 'flex', gap: '8px' }}>
+                    <ActionBtn icon={<MdEdit />} onClick={() => onEdit(plant)} color="secondary" title="تعديل" />
+                    <ActionBtn icon={<MdDelete />} onClick={() => onDelete(plant)} color="error" title="حذف" />
+                </div>
+            </td>
+        </motion.tr>
+    )
+}
+
+function MobileCard({ plant, index, onEdit, onDelete, getHealthStyle }) {
+    const hs = getHealthStyle(plant.health_status)
+    return (
+        <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: index * 0.1 }}
+            className="card"
+            style={{ padding: '16px', marginBottom: '12px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: '12px' }}>
+                <div>
+                    <h4 style={{ fontWeight: 700, fontSize: '15px', marginBottom: '4px' }}>{plant.name}</h4>
+                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', padding: '3px 10px', borderRadius: '12px', fontSize: '12px', fontWeight: 500, background: hs.bg, color: hs.color }}>
+                        {hs.icon} {plant.health_status}
+                    </span>
+                </div>
+                <div style={{ display: 'flex', gap: '6px' }}>
+                    <ActionBtn icon={<MdEdit />} onClick={() => onEdit(plant)} color="secondary" title="تعديل" />
+                    <ActionBtn icon={<MdDelete />} onClick={() => onDelete(plant)} color="error" title="حذف" />
+                </div>
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', fontSize: '13px' }}>
+                <div><span style={{ color: 'var(--md-sys-color-on-surface-variant)' }}>النوع:</span> {plant.type}</div>
+                <div><span style={{ color: 'var(--md-sys-color-on-surface-variant)' }}>الكمية:</span> {plant.quantity.toLocaleString()}</div>
+                <div><span style={{ color: 'var(--md-sys-color-on-surface-variant)' }}>التاريخ:</span> {plant.planting_date}</div>
+                <div><span style={{ color: 'var(--md-sys-color-on-surface-variant)' }}>ملاحظات:</span> {plant.notes || '-'}</div>
+            </div>
+        </motion.div>
+    )
+}
+
+function StatCard({ label, value, color }) {
+    return (
+        <motion.div whileHover={{ y: -2 }} className="card" style={{ textAlign: 'center', padding: '16px' }}>
+            <p style={{ color: 'var(--md-sys-color-on-surface-variant)', fontSize: '13px', marginBottom: '6px' }}>{label}</p>
+            <h3 style={{ color, fontSize: '24px', fontWeight: 800 }}>{value}</h3>
+        </motion.div>
+    )
+}
+
+function FormField({ label, error, children }) {
+    return (
+        <div>
+            <label style={labelStyle}>{label}</label>
+            {children}
+            {error && <span style={errorStyle}>{error}</span>}
+        </div>
+    )
+}
+
+function ActionBtn({ icon, onClick, color, title }) {
+    const bg = color === 'error' ? 'var(--md-sys-color-error-container)' : 'var(--md-sys-color-secondary-container)'
+    const clr = color === 'error' ? 'var(--md-sys-color-on-error-container)' : 'var(--md-sys-color-on-secondary-container)'
+    return (
+        <motion.button whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }} onClick={onClick}
+            style={{ width: '36px', height: '36px', borderRadius: '8px', border: 'none', cursor: 'pointer', background: bg, color: clr, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '16px' }}
+            title={title}>{icon}</motion.button>
+    )
+}
+
 // Styles
-const thStyle = {
-    padding: '16px',
-    textAlign: 'right',
-    fontSize: '14px',
-    fontWeight: 700,
-    whiteSpace: 'nowrap'
-}
-
-const tdStyle = {
-    padding: '14px 16px',
-    fontSize: '14px',
-    color: 'var(--md-sys-color-on-surface)'
-}
-
-const labelStyle = {
-    display: 'block',
-    marginBottom: '6px',
-    fontSize: '14px',
-    fontWeight: 600,
-    color: 'var(--md-sys-color-on-surface)'
-}
-
-const inputStyle = {
-    width: '100%',
-    padding: '10px 14px',
-    borderRadius: '10px',
-    border: '1px solid var(--md-sys-color-outline-variant)',
-    background: 'var(--md-sys-color-surface-container-low)',
-    color: 'var(--md-sys-color-on-surface)',
-    fontSize: '14px',
-    outline: 'none',
-    fontFamily: 'Cairo, sans-serif',
-    transition: 'all 0.3s',
-}
-
-const errorStyle = {
-    color: 'var(--md-sys-color-error)',
-    fontSize: '12px',
-    marginTop: '4px',
-    display: 'block'
-}
+const thStyle = { padding: '16px', textAlign: 'right', fontSize: '14px', fontWeight: 700, whiteSpace: 'nowrap' }
+const tdStyle = { padding: '14px 16px', fontSize: '14px', color: 'var(--md-sys-color-on-surface)' }
+const labelStyle = { display: 'block', marginBottom: '6px', fontSize: '14px', fontWeight: 600, color: 'var(--md-sys-color-on-surface)' }
+const inputStyle = { width: '100%', padding: '10px 14px', borderRadius: '10px', border: '1px solid var(--md-sys-color-outline-variant)', background: 'var(--md-sys-color-surface-container-low)', color: 'var(--md-sys-color-on-surface)', fontSize: '14px', outline: 'none', fontFamily: 'Cairo, sans-serif', transition: 'all 0.3s' }
+const errorStyle = { color: 'var(--md-sys-color-error)', fontSize: '12px', marginTop: '4px', display: 'block' }
+const closeBtnStyle = { background: 'transparent', border: 'none', cursor: 'pointer', fontSize: '22px', color: 'var(--md-sys-color-on-surface-variant)', width: '34px', height: '34px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }
+const cancelBtnStyle = { flex: 1, padding: '12px', borderRadius: '12px', border: '1px solid var(--md-sys-color-outline-variant)', background: 'transparent', color: 'var(--md-sys-color-on-surface)', cursor: 'pointer', fontSize: '14px', fontWeight: 600, fontFamily: 'Cairo, sans-serif' }
 
 export default Management

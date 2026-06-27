@@ -177,7 +177,11 @@ function Diagnosis() {
                 )}
             </AnimatePresence>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+            <div style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))',
+                gap: '20px'
+            }}>
                 {/* Left Column - Upload */}
                 <div>
                     <div className="card">
@@ -192,9 +196,9 @@ function Diagnosis() {
                                     whileTap={{ scale: 0.98 }}
                                     style={{
                                         border: `2px dashed ${isDragAccept ? 'var(--md-sys-color-primary)' :
-                                                isDragReject ? 'var(--md-sys-color-error)' :
-                                                    isDragActive ? 'var(--md-sys-color-secondary)' :
-                                                        'var(--md-sys-color-outline)'
+                                            isDragReject ? 'var(--md-sys-color-error)' :
+                                                isDragActive ? 'var(--md-sys-color-secondary)' :
+                                                    'var(--md-sys-color-outline)'
                                             }`,
                                         borderRadius: '16px',
                                         padding: '60px 20px',
@@ -477,7 +481,7 @@ function Diagnosis() {
                             flexDirection: 'column',
                             alignItems: 'center',
                             justifyContent: 'center',
-                            minHeight: '400px',
+                            minHeight: '300px',
                             textAlign: 'center'
                         }}>
                             <MdSearch style={{ fontSize: '64px', color: 'var(--md-sys-color-outline)', marginBottom: '16px' }} />

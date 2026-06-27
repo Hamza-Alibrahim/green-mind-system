@@ -4,7 +4,6 @@ import { Toaster } from 'react-hot-toast'
 import { AnimatePresence } from 'framer-motion'
 import './App.css'
 
-// Icons
 import {
   MdLocalFlorist,
   MdChat,
@@ -12,10 +11,11 @@ import {
   MdWaterDrop,
   MdDashboard,
   MdDarkMode,
-  MdLightMode
+  MdLightMode,
+  MdMenu,
+  MdClose
 } from 'react-icons/md'
 
-// Pages
 import Diagnosis from './pages/Diagnosis'
 import Chat from './pages/Chat'
 import Management from './pages/Management'
@@ -23,13 +23,12 @@ import Irrigation from './pages/Irrigation'
 import Dashboard from './pages/Dashboard'
 
 function App() {
-  // Dark mode state
   const [isDark, setIsDark] = useState(() => {
     const saved = localStorage.getItem('theme')
     return saved === 'dark'
   })
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
-  // Apply theme class to body
   useEffect(() => {
     document.body.className = isDark ? 'dark' : 'light'
     localStorage.setItem('theme', isDark ? 'dark' : 'light')
@@ -55,7 +54,7 @@ function App() {
       <div className="app">
         <Toaster position="top-center" />
 
-        {/* Theme Toggle */}
+        {/* Desktop Theme Toggle */}
         <button
           className="theme-toggle"
           onClick={toggleTheme}
@@ -64,26 +63,42 @@ function App() {
           {isDark ? <MdLightMode /> : <MdDarkMode />}
         </button>
 
+        {/* Mobile Header Bar */}
+        <div className="mobile-header">
+          <button
+            className="mobile-menu-btn"
+            onClick={() => setMobileMenuOpen(true)}
+          >
+            <MdMenu />
+          </button>
+
+          <span className="mobile-title">Green Mind</span>
+
+          <button className="mobile-theme-btn" onClick={toggleTheme}>
+            {isDark ? <MdLightMode /> : <MdDarkMode />}
+          </button>
+        </div>
+
         {/* Sidebar */}
-        <aside className="sidebar">
+        <aside className={`sidebar ${mobileMenuOpen ? 'mobile-open' : ''}`}>
+          {/* Close button inside sidebar - always clickable */}
+          <button
+            className="sidebar-close-btn"
+            onClick={() => setMobileMenuOpen(false)}
+          >
+            <MdClose />
+          </button>
+
           <div className="sidebar-logo">
-            {/* Dynamic logo based on theme */}
             <img
               src={isDark ? '/logo-white.svg' : '/logo-dark.svg'}
               alt="Green Mind Logo"
-              style={{
-                width: '80px',
-                height: '80px',
-                marginBottom: '12px',
-                display: 'block',
-                margin: '0 auto 12px'
-              }}
             />
             <h2>Green Mind</h2>
             <p>نظام العناية الذكية بالنباتات</p>
           </div>
 
-          <nav className="sidebar-nav">
+          <nav className="sidebar-nav" onClick={() => setMobileMenuOpen(false)}>
             {menuItems.filter(item => item.show).map(item => (
               <NavLink
                 key={item.path}
@@ -99,12 +114,18 @@ function App() {
             ))}
           </nav>
 
-          <div style={{ padding: '15px', borderTop: '1px solid var(--md-sys-color-outline-variant)' }}>
-            <small style={{ opacity: 0.7 }}>
+          <div className="sidebar-footer">
+            <small>
               {user.isAdmin ? '👑 مدير' : '👤 مستخدم'}: {user.name}
             </small>
           </div>
         </aside>
+
+        {/* Sidebar Overlay */}
+        <div
+          className={`sidebar-overlay ${mobileMenuOpen ? 'show' : ''}`}
+          onClick={() => setMobileMenuOpen(false)}
+        />
 
         {/* Main Content */}
         <main className="main-content">
