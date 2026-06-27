@@ -67,7 +67,19 @@ function App() {
         {/* Sidebar */}
         <aside className="sidebar">
           <div className="sidebar-logo">
-            <h2>🌿 Green Mind</h2>
+            {/* Dynamic logo based on theme */}
+            <img
+              src={isDark ? '/logo-white.svg' : '/logo-dark.svg'}
+              alt="Green Mind Logo"
+              style={{
+                width: '80px',
+                height: '80px',
+                marginBottom: '12px',
+                display: 'block',
+                margin: '0 auto 12px'
+              }}
+            />
+            <h2>Green Mind</h2>
             <p>نظام العناية الذكية بالنباتات</p>
           </div>
 
